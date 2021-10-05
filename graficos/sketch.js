@@ -6,70 +6,65 @@ var ultimaPartida;
 var mudarFinal = false;
 var ultimoFinal;
 
-var tamanho = [30, 30];
+var tamanho = [40, 40];
 var quadrados = [tamanho[0] * tamanho[1]];
+var algo;
 
 
 function setup() {
-  frameRate(24);
+  frameRate(100);
   createCanvas(1000, 800);
   criarMapa(30, 30);
-
+  
+  algo = new algoritimos((quadrados));
+  algo.buscaLargura()
+  
 }
 
 function draw() {
 
   background(220);
+  algo.pintarCaminho()
   desenharMapa();
-
+  
 
 
 }
 
 function mousePressed() {
-  for(var i = 0;i < quadrados.length;i++){
+  for (var i = 0; i < quadrados.length; i++) {
     quadrados[i].pintarFilhos();
-
-
   }
- 
 }
 
 function mouseDragged() {
   arrastarPartida();
   arrastarFinal();
-  
-
-  
-
-  
 }
 
-function arrastarPartida(){
+//arrasta o triangulo
+function arrastarPartida() {
   for (var i = 0; i < quadrados.length; i++) {
-
     if (mouseX > quadrados[i].x && mouseX < quadrados[i].x + quadrados[i].l && mouseY < quadrados[i].y + quadrados[i].l && mouseY > quadrados[i].y && quadrados[i].partida == true) {
       ultimaPartida = quadrados[i];
       mudarPartida = true
-      
     }
-
-
   }
   if (mudarPartida) {
     for (var i = 0; i < quadrados.length; i++) {
       if (mouseX > quadrados[i].x && mouseX < quadrados[i].x + quadrados[i].l && mouseY < quadrados[i].y + quadrados[i].l && mouseY > quadrados[i].y) {
         ultimaPartida.partida = false;
         quadrados[i].partida = true
-        ultimaPartida = quadrados[i]; 
-      }'                                                '
+        ultimaPartida = quadrados[i];
+      } '                                                '
     }
 
   }
 
 }
 
-function arrastarFinal(){
+//arrasta a bolinha da posicao final
+function arrastarFinal() {
   for (var i = 0; i < quadrados.length; i++) {
 
     if (mouseX > quadrados[i].x && mouseX < quadrados[i].x + quadrados[i].l && mouseY < quadrados[i].y + quadrados[i].l && mouseY > quadrados[i].y && quadrados[i].final == true) {
@@ -85,8 +80,8 @@ function arrastarFinal(){
       if (mouseX > quadrados[i].x && mouseX < quadrados[i].x + quadrados[i].l && mouseY < quadrados[i].y + quadrados[i].l && mouseY > quadrados[i].y) {
         ultimoFinal.final = false;
         quadrados[i].final = true
-        ultimoFinal = quadrados[i]; 
-      }'                                                '
+        ultimoFinal = quadrados[i];
+      } '                                                '
     }
 
   }
@@ -98,63 +93,121 @@ function mouseReleased() {
 }
 
 function criarMapa() {
-
+//coloca o ponto de partida e o ponto final no mapa
   for (var i = 0; i < tamanho[0]; i++) {
     for (var k = 0; k < tamanho[1]; k++) {
+      if (i == tamanho[0] / 2 && k == 10) {
+        quadrados[tamanho[0] * i + k] = new Quadrado(k * 20, i * 20, 20, false, true, [], false)
+      } else if (i == tamanho[0] / 2 && k == tamanho[1] - 1) {
 
-
-      if (i == tamanho[0] / 2 && k == 0) {
-        quadrados[tamanho[0] * i + k] = new Quadrado(k * 20, i * 20, 20, false, true,[],false)
-      } else if(i == tamanho[0] / 2 && k == tamanho[1]-1){
-        
-        quadrados[(tamanho[0]) * i + k] = new Quadrado(k * 20, i * 20, 20, false, false,[],true)
+        quadrados[(tamanho[0]) * i + k] = new Quadrado(k * 20, i * 20, 20, false, false, [], true)
       }
       else {
-        quadrados[(tamanho[0]) * i + k] = new Quadrado(k * 20, i * 20, 20, false, false,[],false)
+        quadrados[(tamanho[0]) * i + k] = new Quadrado(k * 20, i * 20, 20, false, false, [], false)
       }
 
     }
   }
 
-
+// popula as arestas de cada quadrado
   for (var i = 0; i < tamanho[0]; i++) {
     for (var k = 0; k < tamanho[1]; k++) {
       var quad = [];
       var cont = 0;
-      if(k > 0){
+      if (k > 0) {
         quad[cont] = quadrados[((tamanho[0]) * i + k) - 1];
         cont++;
       }
-      if(k < tamanho[1]-1){
+      if (k < tamanho[1] - 1) {
         quad[cont] = quadrados[((tamanho[0]) * i + k) + 1];
         cont++;
       }
-
-      if(i > 0){
+      if (i > 0) {
         quad[cont] = quadrados[((tamanho[0]) * i + k) - tamanho[1]];
         cont++;
       }
-
-      if(i < tamanho[0]-1){
+      if (i < tamanho[0] - 1) {
         quad[cont] = quadrados[((tamanho[0]) * i + k) + tamanho[1]];
         cont++;
       }
-
       quadrados[tamanho[0] * i + k].quadrados = quad;
-
     }
   }
 }
 
 function desenharMapa() {
-
   for (var i = 0; i < quadrados.length; i++) {
     quadrados[i].draw()
   }
 }
 
+class algoritimos {
+  constructor(lista) {
+    this.lista = lista;
+    this.fila = [];
+    this.filaAux = [];
+
+  }
+
+  expandirLargura(lista) {
+    for (var i = 0; i < lista.quadrados.length; i++) {
+      if (lista.quadrados[i].expandido) {
+      } else {
+        this.fila.push(lista.quadrados[i])
+        lista.quadrados[i].expandido = true;
+        this.filaAux.push(lista.quadrados[i])
+        //lista.quadrados[i].cor = true;
+      }
+    }
+  }
+
+  returnPartida() {
+    for (var i = 0; i < this.lista.length; i++) {
+      if (this.lista[i].partida == true) {
+        return this.lista[i]
+      }
+    }
+  }
+
+  returnfinal() {
+    for (var i = 0; i < this.lista.length; i++) {
+      if (this.lista[i].final == true) {
+        return this.lista[i]
+      }
+    }
+  }
+
+  buscaLargura() {
+    var pai = this.returnPartida();
+    var cont = 0
+
+    this.fila.push(pai);
+    this.filaAux.push(pai);
+
+    while (true) {
+
+      this.expandirLargura(this.fila[0])
+      
+      this.fila.shift()
+      pai = this.fila[0];
+      cont++;
+      if (pai.final == true) {
+        console.log("parou:" + cont)
+        break;
+      }
+    }
+  }
+
+  pintarCaminho() {
+    if(this.filaAux.length>0){
+    console.log(this.filaAux.length)
+    this.filaAux[0].cor = true;
+    this.filaAux.shift();}
+  }
+}
+
 class Quadrado {
-  constructor(x, y, l, cor, partida,quadrados,final) {
+  constructor(x, y, l, cor, partida, quadrados, final) {
     this.x = x;
     this.y = y;
     this.l = l;
@@ -162,13 +215,14 @@ class Quadrado {
     this.final = final;
     this.partida = partida;
     this.quadrados = quadrados;
+    this.expandido = false;
   }
 
   draw() {
 
     if (this.cor == true) {
 
-      fill(color(255, 204, 0));
+      fill(color(71, 140, 245));
 
     } else { fill(color(255, 255, 255)) }
     square(this.x, this.y, this.l);
@@ -178,7 +232,7 @@ class Quadrado {
     }
 
     if (this.final) {
-      circle(this.x + this.l/2 , this.y + this.l/2  ,this.l * 0.8);
+      circle(this.x + this.l / 2, this.y + this.l / 2, this.l * 0.8);
     }
 
   }
@@ -192,14 +246,14 @@ class Quadrado {
 
   pintarFilhos() {
     if (mouseX > this.x && mouseX < this.x + this.l && mouseY < this.y + this.l && mouseY > this.y) {
-      for(var i = 0;i < this.quadrados.length;i++){
+      for (var i = 0; i < this.quadrados.length; i++) {
         this.quadrados[i].cor = true;
-        
+
       }
     }
   }
 
- 
+
 
 
 }
