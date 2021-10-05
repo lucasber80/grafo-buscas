@@ -3,7 +3,10 @@ var clicouQuadrado = false;
 var mudarPartida = false;
 var ultimaPartida;
 
-var tamanho = [30, 30];
+var mudarFinal = false;
+var ultimoFinal;
+
+var tamanho = [6, 6];
 var quadrados = [tamanho[0] * tamanho[1]];
 
 
@@ -25,18 +28,30 @@ function draw() {
 
 function mousePressed() {
   for(var i = 0;i < quadrados.length;i++){
-    quadrados[i].pintarFilhos();
+    //quadrados[i].pintarFilhos();
 
 
   }
+ 
 }
 
 function mouseDragged() {
+  arrastarPartida();
+  arrastarFinal();
+  
+
+  
+
+  
+}
+
+function arrastarPartida(){
   for (var i = 0; i < quadrados.length; i++) {
 
     if (mouseX > quadrados[i].x && mouseX < quadrados[i].x + quadrados[i].l && mouseY < quadrados[i].y + quadrados[i].l && mouseY > quadrados[i].y && quadrados[i].partida == true) {
       ultimaPartida = quadrados[i];
       mudarPartida = true
+      
     }
 
 
@@ -51,6 +66,31 @@ function mouseDragged() {
     }
 
   }
+
+}
+
+function arrastarFinal(){
+  for (var i = 0; i < quadrados.length; i++) {
+
+    if (mouseX > quadrados[i].x && mouseX < quadrados[i].x + quadrados[i].l && mouseY < quadrados[i].y + quadrados[i].l && mouseY > quadrados[i].y && quadrados[i].final == true) {
+      ultimoFinal = quadrados[i];
+      mudarFinal = true
+      console.log("entrou")
+    }
+
+
+  }
+  if (mudarFinal) {
+    for (var i = 0; i < quadrados.length; i++) {
+      if (mouseX > quadrados[i].x && mouseX < quadrados[i].x + quadrados[i].l && mouseY < quadrados[i].y + quadrados[i].l && mouseY > quadrados[i].y) {
+        ultimoFinal.final = false;
+        quadrados[i].final = true
+        ultimoFinal = quadrados[i]; 
+      }'                                                '
+    }
+
+  }
+
 }
 
 function mouseReleased() {
@@ -64,9 +104,13 @@ function criarMapa() {
 
 
       if (i == tamanho[0] / 2 && k == 0) {
-        quadrados[tamanho[0] * i + k] = new Quadrado(k * 20, i * 20, 20, false, true)
-      } else {
-        quadrados[(tamanho[0]) * i + k] = new Quadrado(k * 20, i * 20, 20, false, false)
+        quadrados[tamanho[0] * i + k] = new Quadrado(k * 20, i * 20, 20, false, true,[],false)
+      } else if(i == tamanho[0] / 2 && k == tamanho[1]-1){
+        
+        quadrados[(tamanho[0]) * i + k] = new Quadrado(k * 20, i * 20, 20, false, false,[],true)
+      }
+      else {
+        quadrados[(tamanho[0]) * i + k] = new Quadrado(k * 20, i * 20, 20, false, false,[],false)
       }
 
     }
@@ -110,11 +154,12 @@ function desenharMapa() {
 }
 
 class Quadrado {
-  constructor(x, y, l, cor, partida,quadrados) {
+  constructor(x, y, l, cor, partida,quadrados,final) {
     this.x = x;
     this.y = y;
     this.l = l;
     this.cor = cor;
+    this.final = final;
     this.partida = partida;
     this.quadrados = quadrados;
   }
@@ -130,6 +175,10 @@ class Quadrado {
 
     if (this.partida) {
       triangle(this.x, this.y + this.l, this.x + this.l / 2, this.y, this.x + this.l, this.y + this.l);
+    }
+
+    if (this.final) {
+      circle(this.x + this.l/2 , this.y + this.l/2  ,this.l * 0.8);
     }
 
   }
