@@ -24,11 +24,11 @@ function draw() {
 }
 
 function mousePressed() {
-  // for(var i = 0;i < quadrados.length;i++){
-  //   quadrados[i].clicado(i)
+  for(var i = 0;i < quadrados.length;i++){
+    quadrados[i].pintarFilhos();
 
 
-  // }
+  }
 }
 
 function mouseDragged() {
@@ -47,7 +47,7 @@ function mouseDragged() {
         ultimaPartida.partida = false;
         quadrados[i].partida = true
         ultimaPartida = quadrados[i]; 
-      }
+      }'                                                '
     }
 
   }
@@ -71,6 +71,35 @@ function criarMapa() {
 
     }
   }
+
+
+  for (var i = 0; i < tamanho[0]; i++) {
+    for (var k = 0; k < tamanho[1]; k++) {
+      var quad = [];
+      var cont = 0;
+      if(k > 0){
+        quad[cont] = quadrados[((tamanho[0]) * i + k) - 1];
+        cont++;
+      }
+      if(k < tamanho[1]-1){
+        quad[cont] = quadrados[((tamanho[0]) * i + k) + 1];
+        cont++;
+      }
+
+      if(i > 0){
+        quad[cont] = quadrados[((tamanho[0]) * i + k) - tamanho[1]];
+        cont++;
+      }
+
+      if(i < tamanho[0]-1){
+        quad[cont] = quadrados[((tamanho[0]) * i + k) + tamanho[1]];
+        cont++;
+      }
+
+      quadrados[tamanho[0] * i + k].quadrados = quad;
+
+    }
+  }
 }
 
 function desenharMapa() {
@@ -81,12 +110,13 @@ function desenharMapa() {
 }
 
 class Quadrado {
-  constructor(x, y, l, cor, partida) {
+  constructor(x, y, l, cor, partida,quadrados) {
     this.x = x;
     this.y = y;
     this.l = l;
     this.cor = cor;
     this.partida = partida;
+    this.quadrados = quadrados;
   }
 
   draw() {
@@ -111,11 +141,16 @@ class Quadrado {
     }
   }
 
-  mudarPartida() {
-    
+  pintarFilhos() {
+    if (mouseX > this.x && mouseX < this.x + this.l && mouseY < this.y + this.l && mouseY > this.y) {
+      for(var i = 0;i < this.quadrados.length;i++){
+        this.quadrados[i].cor = true;
+        
+      }
+    }
   }
 
-
+ 
 
 
 }
