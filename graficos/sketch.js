@@ -6,7 +6,7 @@ var ultimaPartida;
 var mudarFinal = false;
 var ultimoFinal;
 
-var tamanho = [6, 6];
+var tamanho = [30, 30];
 var quadrados = [tamanho[0] * tamanho[1]];
 
 
@@ -28,7 +28,7 @@ function draw() {
 
 function mousePressed() {
   for(var i = 0;i < quadrados.length;i++){
-    //quadrados[i].pintarFilhos();
+    quadrados[i].pintarFilhos();
 
 
   }
