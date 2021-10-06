@@ -12,6 +12,8 @@ var algo;
 
 var comecar = false
 
+pintar2 = false;
+
 function setup() {
   frameRate(100);
   createCanvas(1000, 800);
@@ -28,16 +30,21 @@ function draw() {
   background(220);
   if(comecar){
     algo.pintarCaminho()
+    if(pintar2){
+      algo.pintarCaminho2()
+    }
   }
+  
 
 
   desenharMapa();
 }
 
 function comecou() {
+  algo.aux = algo.returnfinal()
   algo.buscaLargura()
   comecar = true
-  console.log("apertou")
+  
 }
 
 
@@ -155,22 +162,23 @@ class algoritimos {
     this.lista = lista;
     this.fila = [];
     this.filaAux = [];
-    this.achouFinal = false;
+    this.caminho = [];
+    this.aux = this.returnfinal();    
   }
 
-  expandirLargura(lista) {
+  expandirLargura(lista,pai) {
     for (var i = 0; i < lista.quadrados.length; i++) {
      if(lista.quadrados[i].final == true){
-      this.achouFinal = true;
+      lista.quadrados[i].pai = pai;
       this.fila.push(lista.quadrados[i])
       this.filaAux.push(lista.quadrados[i])
      }else{
       if (lista.quadrados[i].expandido) {
       } else {
-        this.fila.push(lista.quadrados[i])
+        lista.quadrados[i].pai = pai;
         lista.quadrados[i].expandido = true;
+        this.fila.push(lista.quadrados[i])
         this.filaAux.push(lista.quadrados[i])
-        
       }
      }
     }
@@ -194,30 +202,40 @@ class algoritimos {
 
   buscaLargura() {
     var pai = this.returnPartida();
-    var cont = 0
-
     this.fila.push(pai);
     this.filaAux.push(pai);
-
+    pai.expandido = true;
     while (true) {
-
-      this.expandirLargura(this.fila[0])
-      
+      this.expandirLargura(this.fila[0],pai)
       this.fila.shift()
       pai = this.fila[0];
-      cont++;
-      if (this.achouFinal) {
-        console.log("parou:" + cont)
+     
+      if (pai.final == true) {
+        
         break;
       }
     }
+    
   }
 
   pintarCaminho() {
-    if(this.filaAux.length>0){
-    console.log(this.filaAux.length)
+    if(this.filaAux.length > 0 && this.filaAux[0].final != true){
     this.filaAux[0].cor = true;
     this.filaAux.shift();}
+    else{
+    pintar2 = true
+    }
+    
+  }
+
+  pintarCaminho2(){
+        
+    if(this.aux != null){
+        this.aux.cor2 = true;
+        this.aux = this.aux.pai 
+    }
+       
+
   }
 }
 
@@ -227,19 +245,24 @@ class Quadrado {
     this.y = y;
     this.l = l;
     this.cor = cor;
+    this.cor2 = false;
     this.final = final;
     this.partida = partida;
     this.quadrados = quadrados;
     this.expandido = false;
+    this.pai = null;
   }
 
   draw() {
 
-    if (this.cor == true) {
+    if (this.cor2 == true) {
 
+      fill(color(255, 0, 0));
+
+    } else if(this.cor == true){
       fill(color(71, 140, 245));
-
-    } else { fill(color(255, 255, 255)) }
+    }
+    else { fill(color(255, 255, 255)) }
     square(this.x, this.y, this.l);
 
     if (this.partida) {
