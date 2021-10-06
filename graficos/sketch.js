@@ -6,35 +6,43 @@ var ultimaPartida;
 var mudarFinal = false;
 var ultimoFinal;
 
-var tamanho = [40, 40];
+var tamanho = [30, 30];
 var quadrados = [tamanho[0] * tamanho[1]];
 var algo;
 
+var comecar = false
 
 function setup() {
   frameRate(100);
   createCanvas(1000, 800);
   criarMapa(30, 30);
-  
+  button = createButton('Iniciar');
+  button.position(tamanho[0] * 20, 0);
+  button.mousePressed(comecou)
   algo = new algoritimos((quadrados));
-  algo.buscaLargura()
+  
   
 }
 
 function draw() {
-
   background(220);
-  algo.pintarCaminho()
+  if(comecar){
+    algo.pintarCaminho()
+  }
+
+
   desenharMapa();
-  
-
-
 }
 
+function comecou() {
+  algo.buscaLargura()
+  comecar = true
+  console.log("apertou")
+}
+
+
 function mousePressed() {
-  for (var i = 0; i < quadrados.length; i++) {
-    quadrados[i].pintarFilhos();
-  }
+  
 }
 
 function mouseDragged() {
@@ -70,7 +78,7 @@ function arrastarFinal() {
     if (mouseX > quadrados[i].x && mouseX < quadrados[i].x + quadrados[i].l && mouseY < quadrados[i].y + quadrados[i].l && mouseY > quadrados[i].y && quadrados[i].final == true) {
       ultimoFinal = quadrados[i];
       mudarFinal = true
-      console.log("entrou")
+      
     }
 
 
@@ -90,15 +98,16 @@ function arrastarFinal() {
 
 function mouseReleased() {
   mudarPartida = false;
+  mudarFinal = false;
 }
 
 function criarMapa() {
-//coloca o ponto de partida e o ponto final no mapa
+//coloca o ponto de partida e o ponto final 
   for (var i = 0; i < tamanho[0]; i++) {
     for (var k = 0; k < tamanho[1]; k++) {
-      if (i == tamanho[0] / 2 && k == 10) {
+      if (i == 0 && k == 0) {
         quadrados[tamanho[0] * i + k] = new Quadrado(k * 20, i * 20, 20, false, true, [], false)
-      } else if (i == tamanho[0] / 2 && k == tamanho[1] - 1) {
+      } else if (i == 1 && k == 1) {
 
         quadrados[(tamanho[0]) * i + k] = new Quadrado(k * 20, i * 20, 20, false, false, [], true)
       }
@@ -146,18 +155,24 @@ class algoritimos {
     this.lista = lista;
     this.fila = [];
     this.filaAux = [];
-
+    this.achouFinal = false;
   }
 
   expandirLargura(lista) {
     for (var i = 0; i < lista.quadrados.length; i++) {
+     if(lista.quadrados[i].final == true){
+      this.achouFinal = true;
+      this.fila.push(lista.quadrados[i])
+      this.filaAux.push(lista.quadrados[i])
+     }else{
       if (lista.quadrados[i].expandido) {
       } else {
         this.fila.push(lista.quadrados[i])
         lista.quadrados[i].expandido = true;
         this.filaAux.push(lista.quadrados[i])
-        //lista.quadrados[i].cor = true;
+        
       }
+     }
     }
   }
 
@@ -191,7 +206,7 @@ class algoritimos {
       this.fila.shift()
       pai = this.fila[0];
       cont++;
-      if (pai.final == true) {
+      if (this.achouFinal) {
         console.log("parou:" + cont)
         break;
       }
