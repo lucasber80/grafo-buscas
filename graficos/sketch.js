@@ -5,8 +5,10 @@ var ultimaPartida;
 
 var mudarFinal = false;
 var ultimoFinal;
+var t = 20
+//prompt("escolha o tamanho do mapa")
 
-var tamanho = [30, 30];
+var tamanho = [t, t];
 var quadrados = [tamanho[0] * tamanho[1]];
 var algo;
 
@@ -41,15 +43,62 @@ function draw() {
 }
 
 function comecou() {
+  filhosQuadrado();
   algo.aux = algo.returnfinal()
-  algo.buscaLargura()
+  algo.buscaProfundidade()
+ 
   comecar = true
   
 }
 
+function filhosQuadrado(){
+  // popula as arestas de cada quadrado
+  for (var i = 0; i < tamanho[0]; i++) {
+    for (var k = 0; k < tamanho[1]; k++) {
+      var quad = [];
+      var cont = 0;
+      if (k > 0 ) {
+       
+          quad[cont] = quadrados[((tamanho[0]) * i + k) - 1];
+          cont++;
+        
+      }
+      if (k < tamanho[1] - 1) {
+        
+          quad[cont] = quadrados[((tamanho[0]) * i + k) + 1];
+          cont++;
+        
+        
+      }
+      if (i > 0) {
+        
+          quad[cont] = quadrados[((tamanho[0]) * i + k) - tamanho[1]];
+        cont++;
+        
+      }
+      if (i < tamanho[0] - 1) {
+      
+          quad[cont] = quadrados[((tamanho[0]) * i + k) + tamanho[1]];
+        cont++;
+        
+      }
+
+      // for(var i =0;i < quad.length;i++){
+      //   if(quad[i].muro){
+      //     quad.splice(i,1)
+      //   }
+      // }
+      quadrados[tamanho[0] * i + k].quadrados = quad;
+    }
+  }
+}
+
 
 function mousePressed() {
-  
+  for(var i =0;i < quadrados.length;i++){
+    // quadrados[i].pintarFilhos();
+    //quadrados[i].pintarMuro();
+  }
 }
 
 function mouseDragged() {
@@ -125,30 +174,7 @@ function criarMapa() {
     }
   }
 
-// popula as arestas de cada quadrado
-  for (var i = 0; i < tamanho[0]; i++) {
-    for (var k = 0; k < tamanho[1]; k++) {
-      var quad = [];
-      var cont = 0;
-      if (k > 0) {
-        quad[cont] = quadrados[((tamanho[0]) * i + k) - 1];
-        cont++;
-      }
-      if (k < tamanho[1] - 1) {
-        quad[cont] = quadrados[((tamanho[0]) * i + k) + 1];
-        cont++;
-      }
-      if (i > 0) {
-        quad[cont] = quadrados[((tamanho[0]) * i + k) - tamanho[1]];
-        cont++;
-      }
-      if (i < tamanho[0] - 1) {
-        quad[cont] = quadrados[((tamanho[0]) * i + k) + tamanho[1]];
-        cont++;
-      }
-      quadrados[tamanho[0] * i + k].quadrados = quad;
-    }
-  }
+
 }
 
 function desenharMapa() {
@@ -163,6 +189,7 @@ class algoritimos {
     this.fila = [];
     this.filaAux = [];
     this.caminho = [];
+    
     this.aux = this.returnfinal();    
   }
 
@@ -183,6 +210,8 @@ class algoritimos {
      }
     }
   }
+
+
 
   returnPartida() {
     for (var i = 0; i < this.lista.length; i++) {
@@ -211,7 +240,42 @@ class algoritimos {
       pai = this.fila[0];
      
       if (pai.final == true) {
-        
+        break;
+      }
+    }
+    
+  }
+
+  expandirProfundidade(lista,pai) {
+    for (var i = 0; i < lista.quadrados.length; i++) {
+     if(lista.quadrados[i].final == true){
+      lista.quadrados[i].pai = pai;
+      this.fila.push(lista.quadrados[i])
+      this.filaAux.push(lista.quadrados[i])
+     }else{
+      if (lista.quadrados[i].expandido) {
+      } else {
+        lista.quadrados[i].pai = pai;
+        lista.quadrados[i].expandido = true;
+        this.fila.push(lista.quadrados[i])
+        this.filaAux.push(lista.quadrados[i])
+      }
+     }
+    }
+  }
+
+  buscaProfundidade() {
+    var pai = this.returnPartida();
+    this.fila.push(pai);
+    this.filaAux.push(pai);
+    pai.expandido = true;
+    while (true) {
+      print("entrou")
+      this.expandirProfundidade(this.fila[this.fila.length -1],pai)
+      this.fila.shift()
+      pai = this.fila[this.fila.length -1];
+     if(pai == null){break}
+      if (pai.final == true) {
         break;
       }
     }
@@ -251,6 +315,7 @@ class Quadrado {
     this.quadrados = quadrados;
     this.expandido = false;
     this.pai = null;
+    this.muro = false;
   }
 
   draw() {
@@ -288,6 +353,13 @@ class Quadrado {
         this.quadrados[i].cor = true;
 
       }
+    }
+  }
+
+  pintarMuro() {
+    if (mouseX > this.x && mouseX < this.x + this.l && mouseY < this.y + this.l && mouseY > this.y) {
+        this.cor = true;
+        this.muro = true;
     }
   }
 
