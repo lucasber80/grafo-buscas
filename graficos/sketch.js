@@ -189,10 +189,6 @@ function mousePressed() {
     for (var i = 0; i < quadrados.length; i++) {
         if (mouseX > quadrados[i].x && mouseX < quadrados[i].x + quadrados[i].l && mouseY < quadrados[i].y + quadrados[i].l && mouseY > quadrados[i].y && !quadrados[i].final && !quadrados[i].partida) {
             quadrados[i].pintarMuro();
-            console.log(quadrados[i].id)
-            console.log(quadrados[i].filhos)
-            console.log(quadrados[i].pesos)
-            console.log(quadrados[i].custoUniforme)
         }
     }
 }
