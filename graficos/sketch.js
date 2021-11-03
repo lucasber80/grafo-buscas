@@ -367,10 +367,9 @@ class algoritimos {
                 this.estrutura.splice(menorIndice, 1);
 
             }
-
-
-            var gScore = no.custo + 20;
+            
             for (var i = 0; i < no.filhos.length; i++) {
+                var gScore = no.custo + no.pesos[i];
                 if (no.filhos[i].expandido) {
                     continue;
                 }
@@ -496,6 +495,7 @@ class algoritimos {
             if (aux.id == t.id) {
                 return aux
             }
+            
             this.lista[aux.id].expandido = true
             this.lista[aux.id].filhos.forEach(filho => {
                 if (!filho.expandido && filho.id != aux.pai.id && filho.id != origem) {
