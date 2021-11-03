@@ -108,15 +108,15 @@ function desenharMapa() {
     }
 }
 
-function resetaMapa(){
+function resetaMapa() {
     pintar2 = false
-    quadrados.forEach(quadrado =>{
+    quadrados.forEach(quadrado => {
         quadrado.reset()
     })
     algo.reset()
-    
+
 }
-function verificaSeJaTemConexao(idQuadradoAtual, idQuadradoFilho){
+function verificaSeJaTemConexao(idQuadradoAtual, idQuadradoFilho) {
     const quadradoFilho = quadrados[idQuadradoFilho]
     return quadradoFilho.filhos.findIndex(filho => {
         return filho.id == idQuadradoAtual
@@ -124,7 +124,7 @@ function verificaSeJaTemConexao(idQuadradoAtual, idQuadradoFilho){
     // if(quadradoFilho.filhos.length != 0){
     //     quadradoFilho.filhos.forEach(filho =>{
     //         if(filho.id == quadradoAtual.id){
-                
+
     //         }
     //     })
     // }
@@ -141,16 +141,16 @@ function filhosQuadrado() {
             let idQuadradoAtual = tamanho[0] * i + k
             let idQuadradoPossivelFilho
 
-            function adicionaPesosEFilhos(){
+            function adicionaPesosEFilhos() {
                 if (!quadrados[idQuadradoPossivelFilho].muro) {
                     quad[cont] = quadrados[idQuadradoPossivelFilho];
                     resultado = verificaSeJaTemConexao(idQuadradoAtual, idQuadradoPossivelFilho)
-                    if(resultado == -1){
-                        pesos[cont] = t * Math.random(0.1, 1) 
-                    }else{
+                    if (resultado == -1) {
+                        pesos[cont] = t * Math.random(0.1, 1)
+                    } else {
                         pesos[cont] = quadrados[idQuadradoPossivelFilho].pesos[resultado]
                     }
-                    
+
                     cont++;
                 }
             }
@@ -158,7 +158,7 @@ function filhosQuadrado() {
             if (k > 0) {
                 idQuadradoPossivelFilho = idQuadradoAtual - 1;
                 adicionaPesosEFilhos();
-                
+
             }
             if (i < tamanho[0] - 1) {
                 idQuadradoPossivelFilho = idQuadradoAtual + tamanho[1]
@@ -189,7 +189,10 @@ function mousePressed() {
     for (var i = 0; i < quadrados.length; i++) {
         if (mouseX > quadrados[i].x && mouseX < quadrados[i].x + quadrados[i].l && mouseY < quadrados[i].y + quadrados[i].l && mouseY > quadrados[i].y && !quadrados[i].final && !quadrados[i].partida) {
             quadrados[i].pintarMuro();
-            console.log(quadrados[i])
+            console.log(quadrados[i].id)
+            console.log(quadrados[i].filhos)
+            console.log(quadrados[i].pesos)
+            console.log(quadrados[i].custoUniforme)
         }
     }
 }
@@ -269,7 +272,7 @@ class algoritimos {
     }
 
 
-    reset(){
+    reset() {
         this.estrutura = [];
         this.estruturaAux = [];
         this.caminho = [];
@@ -481,6 +484,7 @@ class algoritimos {
         let node = new Node(origem);
         let t = new Node(destino);
 
+
         node.pai = new Node(-1);
         this.estrutura.push(node)
 
@@ -488,38 +492,43 @@ class algoritimos {
         while (!(this.estrutura.length == 0)) {
             aux = this.estrutura.shift()
 
-            if (this.lista[aux.id].expandido) {
-                continue
+            if (!this.lista[aux.id].expandido) {
+                this.estruturaAux.push(this.lista[aux.id])
             }
-            
-            this.estruturaAux.push(this.lista[aux.id])
+
+
             if (aux.id == t.id) {
                 return aux
             }
             this.lista[aux.id].expandido = true
             this.lista[aux.id].filhos.forEach(filho => {
                 if (!filho.expandido && filho.id != aux.pai.id && filho.id != origem) {
-                    node = new Node(filho.id)
                     let index = this.lista[aux.id].filhos.indexOf(filho)
-                    let peso = this.lista[aux.id].pesos[index]
-                    node.gn = aux.gn + peso;
-                    node.pai = aux
-                    this.estrutura.push(node)
+                    let peso = this.lista[aux.id].pesos[index] + aux.gn
+                    if (this.lista[filho.id].custoUniforme >= peso) {
+                        this.lista[filho.id].custoUniforme = peso 
+                        node = new Node(filho.id)
+                        node.gn = peso;
+                        node.pai = aux
 
-                    if (this.estrutura.length != 0) {
-                        let adicionouNo = false;
-                        this.estrutura.forEach(no => {
-                            if (node.gn < no.gn && adicionouNo == false) {
-                                this.estrutura.splice(this.estrutura.indexOf(no), 0, node)
-                                adicionouNo = true;
+                        this.estrutura.push(node)
+
+                        if (this.estrutura.length != 0) {
+                            let adicionouNo = false;
+                            this.estrutura.forEach(no => {
+                                if (node.gn < no.gn && adicionouNo == false) {
+                                    this.estrutura.splice(this.estrutura.indexOf(no), 0, node)
+                                    adicionouNo = true;
+                                }
+                            })
+                            if (adicionouNo == false) {
+                                this.estrutura.push(node)
                             }
-                        })
-                        if (adicionouNo == false) {
+                        } else {
                             this.estrutura.push(node)
                         }
-                    } else {
-                        this.estrutura.push(node)
                     }
+
                 }
             });
 
@@ -569,7 +578,7 @@ class Quadrado {
         this.cor2 = false;
         this.final = final;
         this.partida = partida;
-        this.filhos = filhos; 
+        this.filhos = filhos;
         this.pesos = null
         this.expandido = false;
         this.pai = null;
@@ -577,9 +586,10 @@ class Quadrado {
         this.custoEmLinhaReta = 0;
         this.custo = 0;
         this.custoAEstrela = 0;
+        this.custoUniforme = Number.MAX_VALUE
     }
 
-    reset(){
+    reset() {
         this.cor = false;
         this.cor2 = false;
         this.expandido = false;
@@ -587,6 +597,7 @@ class Quadrado {
         this.custoEmLinhaReta = 0;
         this.custo = 0;
         this.custoAEstrela = 0;
+        this.custoUniforme = Number.MAX_VALUE
     }
 
     draw() {
